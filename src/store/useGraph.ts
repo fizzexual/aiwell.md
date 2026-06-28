@@ -23,14 +23,6 @@ interface GraphState {
   showAdd: boolean;
   toasts: { id: string; msg: string }[];
 
-  // derived helpers (not stored)
-  getNode: (id: string) => AiwellNode | undefined;
-  resolveTitle: (title: string) => string | null;
-  allModels: () => string[];
-  allTags: () => string[];
-  backlinks: (id: string) => AiwellNode[];
-
-  // actions
   addNode: (node: Omit<AiwellNode, "id">) => string;
   updateNode: (id: string, updates: Partial<AiwellNode>) => void;
   deleteNode: (id: string) => void;
@@ -46,7 +38,7 @@ interface GraphState {
 
 export const useGraph = create<GraphState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       nodes: SEED_NODES,
       selectedId: "what-is-aiwell",
       searchQuery: "",
@@ -55,31 +47,6 @@ export const useGraph = create<GraphState>()(
       showImport: false,
       showAdd: false,
       toasts: [],
-
-      getNode: (id) => get().nodes.find((n) => n.id === id),
-
-      resolveTitle: (title) => {
-        const slug = slugify(title);
-        const exact = get().nodes.find((n) => n.id === slug);
-        if (exact) return exact.id;
-        const fuzzy = get().nodes.find(
-          (n) => n.title.toLowerCase() === title.toLowerCase()
-        );
-        return fuzzy?.id ?? null;
-      },
-
-      allModels: () => {
-        const models = new Set(get().nodes.map((n) => n.model));
-        return [...models].sort();
-      },
-
-      allTags: () => {
-        const tags = new Set(get().nodes.flatMap((n) => n.tags));
-        return [...tags].sort();
-      },
-
-      backlinks: (id) =>
-        get().nodes.filter((n) => n.links.includes(id)),
 
       addNode: (node) => {
         const id = slugify(node.title) || `node-${Date.now()}`;

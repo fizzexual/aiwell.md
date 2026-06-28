@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useGraph } from "../store/useGraph";
 import { renderMarkdown } from "../lib/markdown";
 import { inferModelColor } from "../lib/parser";
+import { getNode as findNode, resolveTitle as resolveNodeTitle } from "../lib/nodeUtils";
 import "./NodePanel.css";
 
 const MODEL_COLOR: Record<string, string> = {
@@ -14,24 +15,25 @@ const MODEL_COLOR: Record<string, string> = {
 
 export default function NodePanel() {
   const selectedId = useGraph((s) => s.selectedId);
-  const getNode = useGraph((s) => s.getNode);
-  const resolveTitle = useGraph((s) => s.resolveTitle);
+  const nodes = useGraph((s) => s.nodes);
   const updateNode = useGraph((s) => s.updateNode);
   const deleteNode = useGraph((s) => s.deleteNode);
   const selectNode = useGraph((s) => s.selectNode);
-  const backlinks = useGraph((s) => s.backlinks);
   const toast = useGraph((s) => s.toast);
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
 
-  const node = selectedId ? getNode(selectedId) : undefined;
-  const bl = selectedId ? backlinks(selectedId) : [];
+  const node = useMemo(() => selectedId ? findNode(nodes, selectedId) : undefined, [nodes, selectedId]);
+  const bl = useMemo(
+    () => (selectedId ? nodes.filter((n) => n.links.includes(selectedId)) : []),
+    [nodes, selectedId]
+  );
 
   const html = useMemo(() => {
     if (!node) return "";
-    return renderMarkdown(node.content, resolveTitle);
-  }, [node, resolveTitle]);
+    return renderMarkdown(node.content, (title) => resolveNodeTitle(nodes, title));
+  }, [node, nodes]);
 
   if (!node) {
     return (
@@ -136,7 +138,7 @@ export default function NodePanel() {
               <span className="link-section-label">Links to</span>
               <div className="link-chips">
                 {node.links.map((lid) => {
-                  const target = getNode(lid);
+                  const target = findNode(nodes, lid);
                   if (!target) return null;
                   const tk = inferModelColor(target.model);
                   return (

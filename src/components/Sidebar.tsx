@@ -21,8 +21,8 @@ export default function Sidebar() {
   const setFilterModel = useGraph((s) => s.setFilterModel);
   const setFilterTag = useGraph((s) => s.setFilterTag);
   const selectNode = useGraph((s) => s.selectNode);
-  const allModels = useGraph((s) => s.allModels());
-  const allTags = useGraph((s) => s.allTags());
+  const allModels = useMemo(() => [...new Set(nodes.map((n) => n.model))].sort(), [nodes]);
+  const allTags = useMemo(() => [...new Set(nodes.flatMap((n) => n.tags))].sort(), [nodes]);
 
   const filtered = useMemo(() => {
     let list = nodes;
