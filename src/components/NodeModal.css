@@ -1,0 +1,124 @@
+.node-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: fade-in var(--dur-2) var(--ease);
+  backdrop-filter: blur(2px);
+}
+
+.node-modal {
+  width: min(680px, calc(100vw - 48px));
+  max-height: calc(100vh - 80px);
+  background: var(--bg-app);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-pop);
+  display: flex;
+  flex-direction: column;
+  animation: pop-in var(--dur-3) var(--ease-spring);
+  overflow: hidden;
+}
+
+/* ---- header ---- */
+.node-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 0;
+  flex-shrink: 0;
+}
+
+.node-modal-eyebrow {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.node-modal-close {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tx-3);
+  transition: background var(--dur-1) var(--ease), color var(--dur-1) var(--ease);
+  flex-shrink: 0;
+}
+.node-modal-close:hover { background: var(--bg-hover); color: var(--tx-1); }
+
+/* ---- scroll area ---- */
+.node-modal-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 24px 28px;
+}
+
+.node-modal-title {
+  font-size: 22px;
+  font-weight: 650;
+  color: var(--tx-1);
+  line-height: 1.25;
+  margin: 8px 0 12px;
+  letter-spacing: -0.02em;
+}
+
+.node-modal-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.node-modal-actions {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.node-modal-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 0 0 20px;
+}
+
+.node-modal-editor {
+  width: 100%;
+  min-height: 260px;
+  padding: 12px 14px;
+  background: var(--bg-hover);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  color: var(--tx-1);
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color var(--dur-1) var(--ease);
+}
+.node-modal-editor:focus { border-color: var(--accent); }
+
+.node-modal-prose {
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.node-modal-links {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.node-modal-link-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

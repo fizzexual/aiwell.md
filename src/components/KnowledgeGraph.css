@@ -47,7 +47,7 @@
   stroke-width: 1;
   transition: stroke var(--dur-2) var(--ease), stroke-width var(--dur-2) var(--ease), opacity var(--dur-2) var(--ease);
 }
-.graph-edge.lit { stroke: var(--edge-active); stroke-width: 1.4; }
+.graph-edge.lit { stroke: var(--edge-active); stroke-width: 1.8; opacity: 1 !important; }
 
 /* ---- nodes ---- */
 .graph-node { transition: opacity var(--dur-2) var(--ease); }
@@ -105,8 +105,8 @@
 .graph-node.selected text { fill: var(--tx-1); font-weight: 550; }
 
 /* ---- dim / highlight ---- */
-.graph-node.faded  { opacity: 0.3; }
-.graph-edge.faded  { opacity: 0.35; }
+.graph-node.faded  { opacity: 0.15; }
+.graph-edge.faded  { opacity: 0.08; }
 
 /* ---- legend ---- */
 .graph-legend {

@@ -4,9 +4,9 @@ import { select } from "d3-selection";
 import { zoom } from "d3-zoom";
 import { drag } from "d3-drag";
 import { useGraph } from "../store/useGraph";
+import type { AiwellNode } from "../store/useGraph";
 import "./KnowledgeGraph.css";
 
-// degree → greyscale node color ramp (--node-1 lightest → --node-5 darkest)
 function nodeColorVar(deg: number): string {
   if (deg <= 1) return "var(--node-2)";
   if (deg <= 3) return "var(--node-3)";
@@ -28,13 +28,23 @@ interface SimLink extends d3force.SimulationLinkDatum<SimNode> {
   target: SimNode;
 }
 
+function buildNeighbors(nodes: AiwellNode[], selId: string): Set<string> {
+  const sel = nodes.find((n) => n.id === selId);
+  const set = new Set<string>([selId]);
+  if (!sel) return set;
+  sel.links.forEach((lid) => set.add(lid));
+  nodes.forEach((n) => { if (n.links.includes(selId)) set.add(n.id); });
+  return set;
+}
+
 export default function KnowledgeGraph() {
   const svgRef = useRef<SVGSVGElement>(null);
   const posRef = useRef<Map<string, { x: number; y: number }>>(new Map());
 
-  const nodes      = useGraph((s) => s.nodes);
-  const selectNode = useGraph((s) => s.selectNode);
-  const setShowAdd = useGraph((s) => s.setShowAdd);
+  const nodes           = useGraph((s) => s.nodes);
+  const selectNode      = useGraph((s) => s.selectNode);
+  const setShowAdd      = useGraph((s) => s.setShowAdd);
+  const setShowNodeModal = useGraph((s) => s.setShowNodeModal);
 
   const build = useCallback(() => {
     const svgEl = svgRef.current;
@@ -53,7 +63,16 @@ export default function KnowledgeGraph() {
       .scaleExtent([0.15, 4])
       .on("zoom", (e) => g.attr("transform", e.transform));
     svg.call(zoomBeh).on("dblclick.zoom", null);
-    svg.on("dblclick", () => setShowAdd(true));
+
+    // canvas double-click → add node; canvas click → deselect
+    svg.on("dblclick", (e) => {
+      if ((e.target as SVGElement).closest(".graph-node")) return;
+      setShowAdd(true);
+    });
+    svg.on("click", (e) => {
+      if ((e.target as SVGElement).closest(".graph-node")) return;
+      selectNode(null);
+    });
 
     // degree map
     const degMap = new Map<string, number>();
@@ -109,7 +128,12 @@ export default function KnowledgeGraph() {
           .on("drag",  (e, d) => { d.fx = e.x; d.fy = e.y; })
           .on("end",   (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; })
       )
-      .on("click", (_, d) => selectNode(d.id));
+      .on("click", (e, d) => { e.stopPropagation(); selectNode(d.id); })
+      .on("dblclick", (e, d) => {
+        e.stopPropagation();
+        selectNode(d.id);
+        setShowNodeModal(true);
+      });
 
     // ring drawn first (behind dot)
     nodeEl.append("circle")
@@ -126,10 +150,36 @@ export default function KnowledgeGraph() {
       .attr("text-anchor", "middle")
       .text((d) => d.title.length > 22 ? d.title.slice(0, 21) + "…" : d.title);
 
-    const syncSelected = (selId: string | null) => {
+    // ---- connection highlighting ----
+    const applyHighlight = (selId: string | null) => {
       nodeEl.classed("selected", (d) => d.id === selId);
+
+      if (!selId) {
+        nodeEl.classed("faded connected", false);
+        nodeEl.select<SVGCircleElement>("circle.dot")
+          .attr("fill", (d) => nodeColorVar(d.deg));
+        edge.classed("lit faded", false);
+        return;
+      }
+
+      const neighbors = buildNeighbors(nodes, selId);
+
+      nodeEl.classed("faded",     (d) => !neighbors.has(d.id));
+      nodeEl.classed("connected", (d) => d.id !== selId && neighbors.has(d.id));
+
+      nodeEl.select<SVGCircleElement>("circle.dot")
+        .attr("fill", (d) => {
+          if (d.id === selId)       return "var(--accent)";
+          if (neighbors.has(d.id)) return "var(--accent-connected)";
+          return nodeColorVar(d.deg);
+        });
+
+      edge
+        .classed("lit",   (d) => (d.source as SimNode).id === selId || (d.target as SimNode).id === selId)
+        .classed("faded", (d) => (d.source as SimNode).id !== selId && (d.target as SimNode).id !== selId);
     };
-    syncSelected(useGraph.getState().selectedId);
+
+    applyHighlight(useGraph.getState().selectedId);
 
     sim.on("tick", () => {
       edge
@@ -141,9 +191,9 @@ export default function KnowledgeGraph() {
       simNodes.forEach((n) => { if (n.x != null && n.y != null) posRef.current.set(n.id, { x: n.x, y: n.y }); });
     });
 
-    const unsub = useGraph.subscribe((s) => syncSelected(s.selectedId));
+    const unsub = useGraph.subscribe((s) => applyHighlight(s.selectedId));
     return () => { unsub(); sim.stop(); };
-  }, [nodes, selectNode, setShowAdd]);
+  }, [nodes, selectNode, setShowAdd, setShowNodeModal]);
 
   useEffect(() => {
     const cleanup = build();
@@ -168,7 +218,7 @@ export default function KnowledgeGraph() {
       </div>
       <div className="map-canvas">
         <svg ref={svgRef} className="graph-svg" />
-        <div className="graph-hint">double-click to add · drag · scroll to zoom</div>
+        <div className="graph-hint">double-click canvas to add · click node to highlight · double-click to open</div>
       </div>
     </div>
   );

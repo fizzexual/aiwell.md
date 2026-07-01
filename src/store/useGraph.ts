@@ -22,6 +22,7 @@ interface GraphState {
   filterTag: string | null;
   showImport: boolean;
   showAdd: boolean;
+  showNodeModal: boolean;
   toasts: { id: string; msg: string }[];
   theme: "light" | "dark";
 
@@ -35,6 +36,7 @@ interface GraphState {
   setFilterTag: (t: string | null) => void;
   setShowImport: (v: boolean) => void;
   setShowAdd: (v: boolean) => void;
+  setShowNodeModal: (v: boolean) => void;
   toast: (msg: string) => void;
   dismissToast: (id: string) => void;
   toggleTheme: () => void;
@@ -50,6 +52,7 @@ export const useGraph = create<GraphState>()(
       filterTag: null,
       showImport: false,
       showAdd: false,
+      showNodeModal: false,
       toasts: [],
       theme: "light" as const,
 
@@ -92,6 +95,7 @@ export const useGraph = create<GraphState>()(
       setFilterTag: (filterTag) => set({ filterTag }),
       setShowImport: (showImport) => set({ showImport }),
       setShowAdd: (showAdd) => set({ showAdd }),
+      setShowNodeModal: (showNodeModal) => set({ showNodeModal }),
 
       toast: (msg) => {
         const id = Math.random().toString(36).slice(2);

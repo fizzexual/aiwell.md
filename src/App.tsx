@@ -8,15 +8,18 @@ import KnowledgeGraph from "./components/KnowledgeGraph";
 import NodePanel from "./components/NodePanel";
 import ImportModal from "./components/ImportModal";
 import AddNodeModal from "./components/AddNodeModal";
+import NodeModal from "./components/NodeModal";
 import Toaster from "./components/Toaster";
 import "./App.css";
 
 export default function App() {
-  const showImport    = useGraph((s) => s.showImport);
-  const showAdd       = useGraph((s) => s.showAdd);
-  const theme         = useGraph((s) => s.theme);
-  const setShowImport = useGraph((s) => s.setShowImport);
-  const setShowAdd    = useGraph((s) => s.setShowAdd);
+  const showImport       = useGraph((s) => s.showImport);
+  const showAdd          = useGraph((s) => s.showAdd);
+  const showNodeModal    = useGraph((s) => s.showNodeModal);
+  const theme            = useGraph((s) => s.theme);
+  const setShowImport    = useGraph((s) => s.setShowImport);
+  const setShowAdd       = useGraph((s) => s.setShowAdd);
+  const setShowNodeModal = useGraph((s) => s.setShowNodeModal);
 
   // sync theme to html data-theme
   useEffect(() => {
@@ -50,7 +53,7 @@ export default function App() {
       const mod = e.metaKey || e.ctrlKey;
       if (mod && e.key === "i") { e.preventDefault(); setShowImport(true); }
       if (mod && e.key === "n") { e.preventDefault(); setShowAdd(true); }
-      if (e.key === "Escape")   { setShowImport(false); setShowAdd(false); }
+      if (e.key === "Escape")   { setShowImport(false); setShowAdd(false); setShowNodeModal(false); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -64,8 +67,9 @@ export default function App() {
         <KnowledgeGraph />
         <NodePanel />
       </div>
-      {showImport && <ImportModal />}
-      {showAdd    && <AddNodeModal />}
+      {showImport    && <ImportModal />}
+      {showAdd       && <AddNodeModal />}
+      {showNodeModal && <NodeModal />}
       <Toaster />
     </div>
   );

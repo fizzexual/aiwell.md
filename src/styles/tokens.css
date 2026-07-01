@@ -36,9 +36,10 @@
   --node-4: #5f5f66;
   --node-5: #2c2c30;
   --edge: #e7e7e9;
-  --edge-active: #c9c9cd;
+  --edge-active: #6d4bd0;
   --ring: #1c1c1e;
   --graph-label: #76767c;
+  --accent-connected: #9f82e0;
 
   /* ---- model colors ---- */
   --model-claude: #6d4bd0;
@@ -110,9 +111,10 @@
   --node-4: #9a9aa3;
   --node-5: #e8e8ec;
   --edge: #2c2c31;
-  --edge-active: #45454d;
+  --edge-active: #a98bff;
   --ring: #ededf0;
   --graph-label: #a6a6ae;
+  --accent-connected: #7d5fd4;
 
   --model-claude: #a98bff;
   --model-gpt: #34d399;
