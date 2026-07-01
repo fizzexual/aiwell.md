@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import { useGraph } from "./store/useGraph";
+import { loadAllNodes, watchNodes, seedToDisk, isTauri } from "./lib/fileStore";
+import { SEED_NODES } from "./data/seed";
 import TitleBar from "./components/TitleBar";
 import Sidebar from "./components/Sidebar";
 import KnowledgeGraph from "./components/KnowledgeGraph";
@@ -20,6 +22,28 @@ export default function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  // load nodes from ~/.aiwell/nodes/ on startup; watch for external writes
+  useEffect(() => {
+    if (!isTauri()) return;
+    let unwatch: (() => void) | undefined;
+
+    loadAllNodes().then(async (loaded) => {
+      if (loaded.length > 0) {
+        useGraph.getState().initNodes(loaded);
+      } else {
+        // first run — seed the vault onto disk
+        await seedToDisk(SEED_NODES);
+        useGraph.getState().initNodes(SEED_NODES);
+      }
+      unwatch = await watchNodes((nodes) => {
+        useGraph.getState().initNodes(nodes);
+      });
+    });
+
+    return () => { unwatch?.(); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { SEED_NODES } from "../data/seed";
 import { parseWikilinks, slugify } from "../lib/parser";
+import { writeNode, deleteNodeFile } from "../lib/fileStore";
 
 export interface AiwellNode {
   id: string;
@@ -24,6 +25,7 @@ interface GraphState {
   toasts: { id: string; msg: string }[];
   theme: "light" | "dark";
 
+  initNodes: (nodes: AiwellNode[]) => void;
   addNode: (node: Omit<AiwellNode, "id">) => string;
   updateNode: (id: string, updates: Partial<AiwellNode>) => void;
   deleteNode: (id: string) => void;
@@ -51,23 +53,29 @@ export const useGraph = create<GraphState>()(
       toasts: [],
       theme: "light" as const,
 
+      initNodes: (nodes) => set({ nodes }),
+
       addNode: (node) => {
         const id = slugify(node.title) || `node-${Date.now()}`;
         const links = parseWikilinks(node.content);
         const newNode: AiwellNode = { ...node, id, links };
         set((s) => ({ nodes: [...s.nodes, newNode], selectedId: id }));
+        writeNode(newNode);
         return id;
       },
 
       updateNode: (id, updates) => {
+        let updated: AiwellNode | undefined;
         set((s) => ({
           nodes: s.nodes.map((n) => {
             if (n.id !== id) return n;
             const next = { ...n, ...updates };
             next.links = parseWikilinks(next.content);
+            updated = next;
             return next;
           }),
         }));
+        if (updated) writeNode(updated);
       },
 
       deleteNode: (id) => {
@@ -75,6 +83,7 @@ export const useGraph = create<GraphState>()(
           nodes: s.nodes.filter((n) => n.id !== id),
           selectedId: s.selectedId === id ? null : s.selectedId,
         }));
+        deleteNodeFile(id);
       },
 
       selectNode: (id) => set({ selectedId: id }),
@@ -101,7 +110,6 @@ export const useGraph = create<GraphState>()(
     {
       name: "aiwell.graph.v1",
       partialize: (s) => ({
-        nodes: s.nodes,
         selectedId: s.selectedId,
         theme: s.theme,
       }),

@@ -12,7 +12,7 @@ After each significant exchange, an AI writes a structured node here: what was d
 
 Each **node** is a focused summary of one topic, written by an AI after a session. Nodes link to each other with [[wikilinks]], forming a navigable knowledge graph.
 
-The graph is stored locally in your browser's localStorage — private, offline, and instant.
+Each node is stored as a plain .md file in ~/.aiwell/nodes/ — private, offline, and readable by any AI tool.
 
 ## Key ideas
 
