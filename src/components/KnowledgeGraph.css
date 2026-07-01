@@ -53,17 +53,19 @@
 .graph-node { transition: opacity var(--dur-2) var(--ease); }
 .graph-node circle.dot {
   cursor: pointer;
-  transition: fill var(--dur-2) var(--ease), stroke var(--dur-1) var(--ease), r var(--dur-1) var(--ease-spring);
+  stroke: none;
+  transition: fill var(--dur-2) var(--ease), r var(--dur-1) var(--ease-spring);
 }
+.graph-node:hover circle.dot { filter: brightness(1.15); }
 .graph-node circle.ring {
   fill: none;
   stroke: var(--ring);
-  stroke-width: 1.5;
+  stroke-width: 2;
   opacity: 0;
-  transform: scale(0.7);
+  transform: scale(0.6);
   transform-box: fill-box;
   transform-origin: center;
-  transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-spring);
+  transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-3) var(--ease-spring);
   pointer-events: none;
 }
 .graph-node.selected circle.ring { opacity: 1; transform: scale(1); }

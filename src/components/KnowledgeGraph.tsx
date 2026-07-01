@@ -4,26 +4,23 @@ import { select } from "d3-selection";
 import { zoom } from "d3-zoom";
 import { drag } from "d3-drag";
 import { useGraph } from "../store/useGraph";
-import { inferModelColor } from "../lib/parser";
 import "./KnowledgeGraph.css";
 
-const MODEL_VAR: Record<string, string> = {
-  claude: "--model-claude",
-  gpt:    "--model-gpt",
-  gemini: "--model-gemini",
-  manual: "--model-manual",
-  other:  "--model-other",
-};
+// degree → greyscale node color ramp (--node-1 lightest → --node-5 darkest)
+function nodeColorVar(deg: number): string {
+  if (deg <= 1) return "var(--node-2)";
+  if (deg <= 3) return "var(--node-3)";
+  if (deg <= 5) return "var(--node-4)";
+  return "var(--node-5)";
+}
 
-function modelColor(model: string): string {
-  const k = inferModelColor(model);
-  return `var(${MODEL_VAR[k] ?? MODEL_VAR.other})`;
+function dotR(deg: number): number {
+  return 6 + Math.min(deg * 1.8, 8);
 }
 
 interface SimNode extends d3force.SimulationNodeDatum {
   id: string;
   title: string;
-  model: string;
   deg: number;
 }
 interface SimLink extends d3force.SimulationLinkDatum<SimNode> {
@@ -68,7 +65,7 @@ export default function KnowledgeGraph() {
 
     const simNodes: SimNode[] = nodes.map((n) => {
       const saved = posRef.current.get(n.id);
-      return { id: n.id, title: n.title, model: n.model, deg: degMap.get(n.id) ?? 0, x: saved?.x, y: saved?.y };
+      return { id: n.id, title: n.title, deg: degMap.get(n.id) ?? 0, x: saved?.x, y: saved?.y };
     });
 
     const nodeById = new Map(simNodes.map((n) => [n.id, n]));
@@ -85,10 +82,10 @@ export default function KnowledgeGraph() {
     });
 
     const sim = d3force.forceSimulation<SimNode, SimLink>(simNodes)
-      .force("link",    d3force.forceLink<SimNode, SimLink>(simLinks).id((d) => d.id).distance(120).strength(0.55))
-      .force("charge",  d3force.forceManyBody().strength(-260))
+      .force("link",    d3force.forceLink<SimNode, SimLink>(simLinks).id((d) => d.id).distance(130).strength(0.5))
+      .force("charge",  d3force.forceManyBody().strength(-300))
       .force("center",  d3force.forceCenter(width / 2, height / 2).strength(0.05))
-      .force("collide", d3force.forceCollide(32));
+      .force("collide", d3force.forceCollide((d) => dotR(d.deg) + 18));
 
     // edges
     const edgeG = g.append("g");
@@ -114,19 +111,20 @@ export default function KnowledgeGraph() {
       )
       .on("click", (_, d) => selectNode(d.id));
 
+    // ring drawn first (behind dot)
     nodeEl.append("circle")
       .attr("class", "ring")
-      .attr("r", 18);
+      .attr("r", (d) => dotR(d.deg) + 5);
 
     nodeEl.append("circle")
       .attr("class", "dot")
-      .attr("r", (d) => 7 + Math.min(d.deg * 1.5, 6))
-      .attr("fill", (d) => modelColor(d.model));
+      .attr("r", (d) => dotR(d.deg))
+      .attr("fill", (d) => nodeColorVar(d.deg));
 
     nodeEl.append("text")
-      .attr("dy", (d) => 7 + Math.min(d.deg * 1.5, 6) + 12)
+      .attr("dy", (d) => dotR(d.deg) + 13)
       .attr("text-anchor", "middle")
-      .text((d) => d.title.length > 20 ? d.title.slice(0, 19) + "…" : d.title);
+      .text((d) => d.title.length > 22 ? d.title.slice(0, 21) + "…" : d.title);
 
     const syncSelected = (selId: string | null) => {
       nodeEl.classed("selected", (d) => d.id === selId);
@@ -160,29 +158,16 @@ export default function KnowledgeGraph() {
     return () => ro.disconnect();
   }, [build]);
 
-  // unique models for legend
-  const models = [...new Set(nodes.map((n) => n.model))];
-
   return (
     <div className="map">
       <div className="map-header">
         <span className="map-title">
           Knowledge Graph
-          <span className="map-subtitle">{nodes.length} nodes · {models.length} model{models.length !== 1 ? "s" : ""}</span>
+          <span className="map-subtitle">{nodes.length} node{nodes.length !== 1 ? "s" : ""}</span>
         </span>
       </div>
       <div className="map-canvas">
         <svg ref={svgRef} className="graph-svg" />
-        {models.length > 1 && (
-          <div className="graph-legend">
-            {models.map((m) => (
-              <div key={m} className="legend-row">
-                <span className="legend-dot" style={{ background: `var(${MODEL_VAR[inferModelColor(m)] ?? MODEL_VAR.other})` }} />
-                <span className="legend-name">{m}</span>
-              </div>
-            ))}
-          </div>
-        )}
         <div className="graph-hint">double-click to add · drag · scroll to zoom</div>
       </div>
     </div>
