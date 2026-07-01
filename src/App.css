@@ -1,14 +1,15 @@
 .app {
-  width: 100%;
-  height: 100%;
+  position: fixed;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  background: var(--bg);
+  background: var(--bg-app);
   overflow: hidden;
 }
 
 .app-body {
   flex: 1;
   display: flex;
+  min-height: 0;
   overflow: hidden;
 }

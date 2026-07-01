@@ -22,6 +22,7 @@ interface GraphState {
   showImport: boolean;
   showAdd: boolean;
   toasts: { id: string; msg: string }[];
+  theme: "light" | "dark";
 
   addNode: (node: Omit<AiwellNode, "id">) => string;
   updateNode: (id: string, updates: Partial<AiwellNode>) => void;
@@ -34,6 +35,7 @@ interface GraphState {
   setShowAdd: (v: boolean) => void;
   toast: (msg: string) => void;
   dismissToast: (id: string) => void;
+  toggleTheme: () => void;
 }
 
 export const useGraph = create<GraphState>()(
@@ -47,6 +49,7 @@ export const useGraph = create<GraphState>()(
       showImport: false,
       showAdd: false,
       toasts: [],
+      theme: "light" as const,
 
       addNode: (node) => {
         const id = slugify(node.title) || `node-${Date.now()}`;
@@ -91,12 +94,16 @@ export const useGraph = create<GraphState>()(
 
       dismissToast: (id) =>
         set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
+
+      toggleTheme: () =>
+        set((s) => ({ theme: s.theme === "light" ? "dark" : "light" })),
     }),
     {
       name: "aiwell.graph.v1",
       partialize: (s) => ({
         nodes: s.nodes,
         selectedId: s.selectedId,
+        theme: s.theme,
       }),
     }
   )

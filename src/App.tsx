@@ -10,20 +10,23 @@ import Toaster from "./components/Toaster";
 import "./App.css";
 
 export default function App() {
-  const showImport = useGraph((s) => s.showImport);
-  const showAdd = useGraph((s) => s.showAdd);
+  const showImport    = useGraph((s) => s.showImport);
+  const showAdd       = useGraph((s) => s.showAdd);
+  const theme         = useGraph((s) => s.theme);
   const setShowImport = useGraph((s) => s.setShowImport);
-  const setShowAdd = useGraph((s) => s.setShowAdd);
+  const setShowAdd    = useGraph((s) => s.setShowAdd);
+
+  // sync theme to html data-theme
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey;
       if (mod && e.key === "i") { e.preventDefault(); setShowImport(true); }
       if (mod && e.key === "n") { e.preventDefault(); setShowAdd(true); }
-      if (e.key === "Escape") {
-        setShowImport(false);
-        setShowAdd(false);
-      }
+      if (e.key === "Escape")   { setShowImport(false); setShowAdd(false); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -38,7 +41,7 @@ export default function App() {
         <NodePanel />
       </div>
       {showImport && <ImportModal />}
-      {showAdd && <AddNodeModal />}
+      {showAdd    && <AddNodeModal />}
       <Toaster />
     </div>
   );

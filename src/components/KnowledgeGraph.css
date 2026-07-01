@@ -1,41 +1,128 @@
-.graph-wrap {
+.map {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-canvas);
+  overflow: hidden;
+}
+
+.map-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px 10px;
+  gap: 8px;
+}
+.map-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tx-1);
+}
+.map-subtitle {
+  font-size: 11.5px;
+  color: var(--tx-4);
+  margin-left: 6px;
+  font-weight: 400;
+}
+
+.map-canvas {
   flex: 1;
   position: relative;
+  border-top: 1px solid var(--line);
   overflow: hidden;
-  background:
-    radial-gradient(ellipse 60% 50% at 50% 50%, rgba(124, 58, 237, 0.06) 0%, transparent 70%),
-    var(--bg);
 }
 
 .graph-svg {
   width: 100%;
   height: 100%;
+  cursor: grab;
   display: block;
 }
+.graph-svg:active { cursor: grabbing; }
 
-.graph-link {
-  stroke: rgba(124, 58, 237, 0.25);
+/* ---- edges ---- */
+.graph-edge {
+  stroke: var(--edge);
+  stroke-width: 1;
+  transition: stroke var(--dur-2) var(--ease), stroke-width var(--dur-2) var(--ease), opacity var(--dur-2) var(--ease);
+}
+.graph-edge.lit { stroke: var(--edge-active); stroke-width: 1.4; }
+
+/* ---- nodes ---- */
+.graph-node { transition: opacity var(--dur-2) var(--ease); }
+.graph-node circle.dot {
+  cursor: pointer;
+  transition: fill var(--dur-2) var(--ease), stroke var(--dur-1) var(--ease), r var(--dur-1) var(--ease-spring);
+}
+.graph-node circle.ring {
+  fill: none;
+  stroke: var(--ring);
   stroke-width: 1.5;
-  stroke-dasharray: none;
-}
-
-.node-body {
-  transition: r 0.15s;
-}
-.node-body:hover { r: 18; }
-
-.node-ring {
+  opacity: 0;
+  transform: scale(0.7);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-spring);
   pointer-events: none;
 }
+.graph-node.selected circle.ring { opacity: 1; transform: scale(1); }
 
-.node-label {
-  fill: var(--text-2);
-  font-size: 11px;
+/* ---- entrance bloom ---- */
+.graph-node.intro {
+  animation: fade-in var(--dur-3) var(--ease-out) backwards;
+  animation-delay: var(--intro-delay, 0ms);
+}
+.graph-node.intro circle.dot {
+  animation: dot-in var(--dur-3) var(--ease-spring) backwards;
+  animation-delay: var(--intro-delay, 0ms);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.graph-node.intro text {
+  animation: fade-in var(--dur-4) var(--ease) backwards;
+  animation-delay: var(--intro-delay, 0ms);
+}
+.graph-edge.intro {
+  animation: fade-in var(--dur-4) var(--ease) backwards;
+  animation-delay: var(--intro-delay, 0ms);
+}
+
+/* ---- label ---- */
+.graph-node text {
   font-family: var(--font);
-  text-anchor: middle;
+  font-size: 10px;
+  font-weight: 450;
+  fill: var(--graph-label);
   pointer-events: none;
-  font-weight: 500;
+  paint-order: stroke;
+  stroke: var(--bg-canvas);
+  stroke-width: 3px;
+  stroke-linejoin: round;
 }
+.graph-node.selected text { fill: var(--tx-1); font-weight: 550; }
+
+/* ---- dim / highlight ---- */
+.graph-node.faded  { opacity: 0.3; }
+.graph-edge.faded  { opacity: 0.35; }
+
+/* ---- legend ---- */
+.graph-legend {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--bg-app) 88%, transparent);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(6px);
+  animation: rise-in-sm var(--dur-2) var(--ease-out);
+}
+.legend-row { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--tx-2); }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
 .graph-hint {
   position: absolute;
@@ -43,7 +130,7 @@
   left: 50%;
   transform: translateX(-50%);
   font-size: 11px;
-  color: var(--text-4);
+  color: var(--tx-4);
   pointer-events: none;
   white-space: nowrap;
 }

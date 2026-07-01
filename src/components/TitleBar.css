@@ -1,101 +1,95 @@
 .titlebar {
-  height: 46px;
+  height: var(--titlebar-h);
+  min-height: var(--titlebar-h);
+  background: var(--bg-app);
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 12px 0 16px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  padding: 0 12px;
+  gap: 4px;
+  border-bottom: 1px solid transparent;
+  z-index: 20;
   flex-shrink: 0;
-  user-select: none;
-  -webkit-user-select: none;
 }
 
-.titlebar-brand {
+/* ---- traffic lights ---- */
+.traffic {
   display: flex;
-  align-items: center;
   gap: 8px;
-  flex: 1;
-  min-width: 0;
-}
-
-.titlebar-logo {
-  width: 20px;
-  height: 20px;
-  color: var(--primary-hi);
+  align-items: center;
   flex-shrink: 0;
-  filter: drop-shadow(0 0 6px var(--primary-glow));
 }
-
-.titlebar-name {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
-  letter-spacing: -0.3px;
+.tl {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  padding: 0;
+  transition: filter var(--dur-1) var(--ease), transform var(--dur-1) var(--ease);
 }
+.tl:hover  { filter: brightness(1.05); }
+.tl:active { filter: brightness(0.85); transform: scale(0.88); }
+.tl-red    { background: var(--tl-red); }
+.tl-yellow { background: var(--tl-yellow); }
+.tl-green  { background: var(--tl-green); }
 
-.titlebar-count {
-  font-size: 11px;
-  color: var(--text-3);
-  background: var(--panel);
-  border: 1px solid var(--border);
-  padding: 1px 7px;
-  border-radius: 20px;
-}
-
-.titlebar-actions {
+/* ---- wordmark ---- */
+.titlebar-mark {
   display: flex;
   align-items: center;
   gap: 6px;
+  margin-left: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tx-1);
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+.titlebar-mark svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.titlebar-count {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--tx-4);
+  margin-left: 2px;
 }
 
-.tb-btn {
-  display: flex;
+.titlebar-spacer { flex: 1; }
+
+/* ---- icon buttons ---- */
+.titlebar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  color: var(--tx-3);
+  transition:
+    background var(--dur-1) var(--ease),
+    color var(--dur-1) var(--ease),
+    transform var(--dur-2) var(--ease-spring);
+}
+.titlebar-btn:hover  { background: var(--bg-hover); color: var(--tx-1); }
+.titlebar-btn:active { transform: scale(0.9); }
+.titlebar-btn.on     { background: var(--bg-active); color: var(--tx-1); }
+
+/* ---- primary add button ---- */
+.titlebar-add {
+  display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 12px;
+  height: 28px;
+  padding: 0 11px;
   border-radius: var(--radius-sm);
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-2);
-  background: var(--panel);
-  border: 1px solid var(--border);
-  transition: all 0.15s;
-}
-.tb-btn svg { width: 14px; height: 14px; }
-.tb-btn:hover {
-  color: var(--text);
-  border-color: var(--border-hi);
-  background: var(--panel-alt);
-}
-
-.tb-btn--primary {
-  background: var(--primary);
-  border-color: var(--primary);
   color: #fff;
+  background: var(--accent);
+  transition:
+    filter var(--dur-1) var(--ease),
+    transform var(--dur-1) var(--ease);
 }
-.tb-btn--primary:hover {
-  background: var(--primary-hi);
-  border-color: var(--primary-hi);
-  box-shadow: 0 0 12px var(--primary-glow);
-}
-
-.titlebar-controls {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.wm-btn {
-  width: 28px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 5px;
-  font-size: 11px;
-  color: var(--text-3);
-  transition: all 0.1s;
-}
-.wm-btn:hover { background: var(--panel-alt); color: var(--text-2); }
-.wm-close:hover { background: var(--red); color: #fff; }
+.titlebar-add:hover  { filter: brightness(1.08); }
+.titlebar-add:active { transform: scale(0.96); filter: brightness(0.94); }
+.titlebar-add svg { flex-shrink: 0; }
